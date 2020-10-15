@@ -50,7 +50,7 @@ function imagesToVideo() {
             "${VIDEO_FILE}"
     else
         ffmpeg -y -framerate 1/${SECONDS_PER_IMAGE} -pattern_type glob -i "${PROJECT_DIR}/*.png" -r 25 -i /usr/share/codetovideo/watermark.png \
-            -i "$AUDIO_FILE" -codec:a aac -shortest \
+            -stream_loop -1 -i "$AUDIO_FILE" -codec:a aac  -map 0:v:0 -map 2:a:0 -shortest \
             -s:v 1920x1080 \
             -c:v h264 -crf 16 -tune animation -preset slower -pix_fmt yuv420p -filter_complex "overlay=x=(main_w-overlay_w):y=(main_h-overlay_h)" \
             "${VIDEO_FILE}"
