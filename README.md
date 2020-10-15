@@ -7,8 +7,9 @@ This project built itself:
 
 <!-- TOC -->
 
-1. [Supported languages](#supported-languages)
-2. [Why?](#why)
+1. [Sample Videos](#sample-videos)
+2. [Supported languages](#supported-languages)
+3. [Why?](#why)
    1. [New Source Code Mediums](#new-mediums)
    2. [Enhance your code craftsmanship](#enhance)
    3. [Secure Your Code for Posterity](#secure)
@@ -24,11 +25,18 @@ This project built itself:
 
 <!-- /TOC -->
 
+<a id="markdown-sample-videos" name="sample-videos"></a>
+## Sample Videos
+
+[![CodeToVideo Self-Build](https://user-images.githubusercontent.com/1125541/96087222-23de1f00-0e89-11eb-8ad4-c89e752c06be.png)](https://youtu.be/ox0OzA50Jfs)
+
+* Self-Built [**CodeToVideo project**](https://youtu.be/ox0OzA50Jfs) [1 min]
+* The [**entire composer/composer project**](https://youtu.be/4xSo5eTq4uc) [30 min]
 
 <a id="markdown-supported-languages" name="supported-languages"></a>
 ## Supported Languages
 
-Virtually everything!!! See [docs/supported-languages.md] for specifics.
+Virtually everything!!! See [**Supported Languages**](docs/supported-languages.md) for specifics.
 
 Certainly all of the big languages: JavaScript, C, C++, C#, PHP, Python, Ruby, JSON, XML, and many, many more! 
 
@@ -125,16 +133,16 @@ This will create a **~/Videos/CodeToVideo/MyProject.mp4** with the following att
 
 The default seconds per page is 2.5 seconds. You cna change this by adding a second decimal parameter:
 
-   # 5 seconds per page
-   code-to-video /path/to/MyProject 5
+    # 5 seconds per page
+    code-to-video /path/to/MyProject 5
 
 You can show multiple pages per second by using a fraction of 1 fps:
 
-   # 2 pages per second
-   code-to-video /path/to/MyProject 0.5
+    # 2 pages per second
+    code-to-video /path/to/MyProject 0.5
    
-   # 3 pages per second
-   code-to-video /path/to/MyProject 0.3333
+    # 3 pages per second
+    code-to-video /path/to/MyProject 0.3333
 
 If you are only interested in future OCR recovery of the source code, you can completely disable
 any pause and show one page per video frame by passing in 0:
