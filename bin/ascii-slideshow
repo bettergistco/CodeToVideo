@@ -1,0 +1,26 @@
+#!/bin/bash
+## Part of HopeSeekr's BashScripts Project
+##   https://github.com/hopeseekr/BashScripts
+## Copyright © 2020 Theodore R. Smith <theodore@phpexperts.pro>
+## License: Creative Commons Attributions International License v4.0
+
+if [ -z "$1" ]; then
+    echo "ERROR: You must provide a file glob for the slideshow."
+    exit 1
+fi
+
+if [ -z "$2" ]; then
+    echo "ERROR: You must provide a slide interval (in seconds)."
+    exit 2
+fi
+
+for each in $1; do
+    clear
+    echo "$each"
+    cat "$each"
+    for ((step = $2; step > 0; step--)); do
+        echo -n $step...
+        sleep 1
+    done
+    echo ""
+done

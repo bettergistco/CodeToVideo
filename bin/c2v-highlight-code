@@ -1,0 +1,41 @@
+#!/bin/bash
+## CodeToVideo/bin/c2v-highlight-code ###
+## Part of CodeToVideo, a Bettergist Collective project
+##   https://github.com/bettergistCo/CodeToVideo
+## Copyright © 2020 Theodore R. Smith <theodore@phpexperts.pro>
+## License: Creative Commons Attributions International License v4.0
+
+# @see https://stackoverflow.com/a/677212/430062
+CHROMA="chroma"
+! hash chroma 2> /dev/null || CHROMA=$(realpath "./bin/chroma")
+[[ -f "${CHROMA}" ]] || {
+    echo >&2 "ERROR: alecthomas/chroma is required and was not found in \$PATH."
+    echo >&2 "       See https://github.com/alecthomas/chroma"
+    exit 127
+}
+
+function highlightCode() {
+    FILE=1
+    TARGET=$(realpath "$1")
+
+    if [ ! -d "$TARGET" ]; then
+        echo "ERROR: $TARGET does not exist or is not a directory."
+        exit 1
+    fi
+
+    BASE_DIR=${TARGET##*/}
+
+    mkdir -p /tmp/CodeToVideo
+
+    cd /tmp/CodeToVideo
+    find "$TARGET" -type f | grep -vP '\.(jpg|jpeg|png|gif|ico|webm|mp4|mpg|avi|mp3|aac|flac|ogg|bmp|xcf|png)$' | grep -vP '(.git|composer.lock|node_modules|vendor)' | while read each; do
+        echo $each
+        echo "${BASE_DIR}/${each##*$BASE_DIR/}" >highlighted.${BASE_DIR}.$FILE
+        ${CHROMA} "$each" >>highlighted.${BASE_DIR}.$FILE
+        ((FILE = FILE + 1))
+    done
+}
+
+highlightCode "$@"
+## END CodeToVideo/bin/c2v-highlight-code ###
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+## CodeToVideo/bin/better-split
+## Part of HopeSeekr's BashScripts Project
+##   https://github.com/hopeseekr/BashScripts
+## Copyright © 2020 Theodore R. Smith <theodore@phpexperts.pro>
+## License: Creative Commons Attributions International License v4.0
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# @see https://stackoverflow.com/a/677212/430062
+hash split 2> /dev/null || { echo >&2 "ERROR: GNU split is required and was not found in \$PATH."; exit 127; }
+
+function betterSplit() {
+    if [ -z "$1" ]; then
+        split "$@"
+        return
+    fi
+    split --numeric-suffixes=1 "$@" "${!#}-"
+}
+
+# Only run this if it's by itself.
+# @see https://stackoverflow.com/a/2684300/430062
+if [[ "${BASH_SOURCE[0]}" == "${0}" && ${BASH_SOURCE[0]##*/} != "code-to-video" ]]; then
+    betterSplit $@
+fi
+
+## END CodeToVideo/bin/better-split ###

@@ -1,0 +1,84 @@
+#!/bin/bash
+## CodeToVideo/bin/c2v-images-to-video ###
+## Part of CodeToVideo, a Bettergist Collective project
+##   https://github.com/bettergistCo/CodeToVideo
+## Copyright © 2020 Theodore R. Smith <theodore@phpexperts.pro>
+## License: Creative Commons Attributions International License v4.0
+
+# @see https://stackoverflow.com/a/677212/430062
+hash ffmpeg 2> /dev/null || { echo >&2 "ERROR: ffmpeg is required and was not found in \$PATH."; exit 127; }
+
+function imagesToVideo() {
+    if [ -z "$1" ]; then
+        echo "ERROR: You must specify a project directory."
+        exit 1
+    fi
+
+    PROJECT_DIR="/tmp/CodeToVideo/pngs/$1"
+
+    if [ ! -d "$PROJECT_DIR" ]; then
+        echo "ERROR: Cannot find the '$PROJECT_DIR' project directory."
+        exit 2
+    fi
+
+    # @see https://stackoverflow.com/a/34195247/430062
+    if ! compgen -G "${PROJECT_DIR}/*.png" >/dev/null; then
+        echo "ERROR: There are no PNGs in '$PROJECT_DIR'."
+        exit 3
+    fi
+
+    SECONDS_PER_IMAGE=1
+    if [ ! -z "$2" ]; then
+        SECONDS_PER_IMAGE=$2
+    fi
+
+    if [ "$SECONDS_PER_IMAGE" == "0" ]; then
+        SECONDS_PER_IMAGE="0.04" # 1/25
+    fi
+
+    if [ ! -z "$3" ]; then
+        AUDIO_FILE=$(realpath "$3")
+    fi
+
+    cd /tmp/codeToVideo
+    mkdir -p "${HOME}/Videos/CodeToVideo"
+    VIDEO_FILE="${HOME}/Videos/CodeToVideo/$1.mp4"
+
+    if [ -z "$AUDIO_FILE" ]; then
+        ffmpeg -y -framerate 1/${SECONDS_PER_IMAGE} -pattern_type glob -i "${PROJECT_DIR}/*.png" -r 25 -i /usr/share/codetovideo/watermark.png -s:v 1920x1080 \
+            -c:v h264 -crf 16 -tune animation -preset slower -pix_fmt yuv420p -filter_complex "overlay=x=(main_w-overlay_w):y=(main_h-overlay_h)" \
+            "${VIDEO_FILE}"
+    else
+        ffmpeg -y -framerate 1/${SECONDS_PER_IMAGE} -pattern_type glob -i "${PROJECT_DIR}/*.png" -r 25 -i /usr/share/codetovideo/watermark.png \
+            -i "$AUDIO_FILE" -codec:a aac -shortest \
+            -s:v 1920x1080 \
+            -c:v h264 -crf 16 -tune animation -preset slower -pix_fmt yuv420p -filter_complex "overlay=x=(main_w-overlay_w):y=(main_h-overlay_h)" \
+            "${VIDEO_FILE}"
+    fi
+
+    if [ ! -f "$VIDEO_FILE" ]; then
+        echo "ERROR: Did not successfully create the video '${VIDEO_FILE}'."
+        exit 4
+    fi
+
+    echo ""
+    echo "Video has been saved to '${VIDEO_FILE}'"
+
+    #rm -rf "$PROJECT_DIR"
+}
+
+# Only run this if it's by itself.
+# @see https://stackoverflow.com/a/2684300/430062
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    if [[ ${BASH_SOURCE[0]##*/} == "code-to-video" ]]; then
+        cd "$ROOT_DIR"
+        BASE_DIR=${1##*/}
+
+        # Swaps $1 with $BASE_DIR.
+        # @see https://stackoverflow.com/a/4827707/430062
+        set -- "$BASE_DIR" "${@:2}"
+    fi
+
+    imagesToVideo "$@"
+fi
+## END CodeToVideo/bin/c2v-images-to-video ###

@@ -1,0 +1,88 @@
+#!/bin/bash
+## CodeToVideo/bin/c2v-text-to-images ###
+## Part of CodeToVideo, a Bettergist Collective project
+##   https://github.com/bettergistCo/CodeToVideo
+## Copyright © 2020 Theodore R. Smith <theodore@phpexperts.pro>
+## License: Creative Commons Attributions International License v4.0
+
+# @see https://stackoverflow.com/a/677212/430062
+hash tail 2> /dev/null || { echo >&2 "ERROR: GNU tail is required and was not found in \$PATH."; exit 127; }
+hash nl 2> /dev/null || { echo >&2 "ERROR: GNU nl is required and was not found in \$PATH."; exit 127; }
+hash scrot 2> /dev/null || { echo >&2 "ERROR: scrot is required and was not found in \$PATH."; exit 127; }
+
+# @see https://stackoverflow.com/a/11307382/430062
+function countFiles() {
+    shopt -s nullglob
+    logfiles=($1)
+    echo ${#logfiles[@]}
+}
+
+function textToImage() {
+    # @see https://unix.stackexchange.com/a/184016/15780
+    TERM_LINES=$(tput lines)
+
+    # @see https://github.com/hopeseekr/BashScripts [american-date]
+
+    cd /tmp/CodeToVideo
+    rm highlighted.*.*-* -vf
+    for file in highlighted.*; do
+        FILENAME=$(head -n1 $file)
+        PROJECT_DIR=pngs/${FILENAME%%/*}
+        PROJECT_FILE=${FILENAME#*/}
+        OUTPUT_BASE_FILENAME="${PROJECT_FILE//\//_}"
+
+        echo $PROJECT_DIR $PROJECT_FILE $OUTPUT_BASE_FILENAME
+        OUTPUT_BASE_FILENAME="${PROJECT_DIR}/${OUTPUT_BASE_FILENAME}"
+        echo ${OUTPUT_BASE_FILENAME}
+
+        mkdir -p "${PROJECT_DIR}"
+
+        if [ -f "../bin/better-split" ]; then
+            ../bin/better-split --lines=$((TERM_LINES - 2)) $file
+        else
+            betterSplit --lines=$((TERM_LINES - 2)) $file
+        fi
+
+        PARTS_COUNT=$(countFiles "$file-*")
+        echo $PARTS_COUNT
+
+        PARTNUM=1
+        for part in $file-*; do
+            POSTFIX=${part##*-}
+
+            clear
+
+            DATETIME=$(date +"%a, %e %B %Y %H:%M:%S %Z [%s]")
+            echo "$FILENAME (${PARTNUM} of ${PARTS_COUNT}) — Archived @ ${DATETIME}"
+
+            # Strip out the extraneous filename.
+            if [ $PARTNUM -eq 1 ]; then
+                # @see https://stackoverflow.com/a/604871/430062
+                tail +2 $part | nl -b a
+            else
+                nl -b a --starting-line-number=$(((TERM_LINES - 2) * ($PARTNUM - 1))) $part
+            fi
+
+            OUTPUT_FILENAME="${OUTPUT_BASE_FILENAME}-${POSTFIX}.png"
+
+            # IMPORTANT!!! Without even this microsleep, bash seems to go async and uses the previous screenshot in the current filename.
+            sleep 0.05
+
+            # @see https://askubuntu.com/a/715335/367284
+            scrot --overwrite -u $OUTPUT_FILENAME
+            rm ${part}
+
+            ((PARTNUM = PARTNUM + 1))
+        done
+
+        rm ${file}
+    done
+}
+
+# Only run this if it's by itself.
+# @see https://stackoverflow.com/a/2684300/430062
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    textToImage "$@"
+fi
+
+## END CodeToVideo/bin/c2v-text-to-images ###
